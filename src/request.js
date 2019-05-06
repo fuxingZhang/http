@@ -1,7 +1,11 @@
 const http = require('http');
+const https = require('https');
 
 module.exports = {
-  get(url, { responseType, timeout = 3000 }) {
+  get(url, config = {}) {
+    const { responseType, timeout = 3000 } = config;
+    const request = /^https:/.test(url) ? https : http;
+
     return new Promise((resolve, reject) => {
       const options = {
         timeout
@@ -17,7 +21,7 @@ module.exports = {
         }
       }
 
-      http.get(url, options, res => {
+      request.get(url, options, res => {
         const { statusCode } = res;
         const contentType = res.headers['content-type'];
 
@@ -47,6 +51,8 @@ module.exports = {
     })
   },
   post(url, data) {
+    const request = /https:/.test(url) ? https : http;
+    
     return new Promise((resolve, reject) => {
       const options = {
         method: 'post',
@@ -60,7 +66,7 @@ module.exports = {
         'Content-Length': Buffer.byteLength(postData)
       }
 
-      const req = http.request(url, options, res => {
+      const req = request.request(url, options, res => {
         let body = '';
 
         res.on('data', chunk => {
