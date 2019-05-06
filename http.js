@@ -17,7 +17,7 @@ module.exports = {
         }
       }
 
-      http.get(url, res => {
+      http.get(url, options, res => {
         const { statusCode } = res;
         const contentType = res.headers['content-type'];
 
