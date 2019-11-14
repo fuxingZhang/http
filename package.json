@@ -1,0 +1,32 @@
+{
+  "name": "@zhangfuxing/http",
+  "version": "1.0.0",
+  "description": "Promise based HTTP client for node.js",
+  "main": "lib",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha test/index.test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fuxingZhang/http.git"
+  },
+  "keywords": [
+    "get",
+    "post",
+    "put",
+    "delete"
+  ],
+  "author": "Zhang Fu Xing <502545703@qq.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/fuxingZhang/http/issues"
+  },
+  "homepage": "https://github.com/fuxingZhang/http#readme",
+  "devDependencies": {
+    "mocha": "^6.2.2"
+  }
+}

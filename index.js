@@ -1,6 +1,45 @@
 const http = require('http');
 const https = require('https');
 
+function getPromise({ url, data = '', method }) {
+  const request = /https:/.test(url) ? https : http;
+
+  return new Promise((resolve, reject) => {
+    const options = {
+      method,
+      timeout: 3000
+    };
+
+    const postData = JSON.stringify(data);
+
+    options.headers = {
+      'Content-Type': 'application/json',
+      'Content-Length': Buffer.byteLength(postData)
+    }
+
+    const req = request.request(url, options, res => {
+      let body = '';
+
+      res.on('data', chunk => {
+        res.setEncoding('utf8');
+        // equal to: body += data.toString()
+        body += chunk;
+      });
+
+      res.on('end', () => {
+        resolve(body);
+      });
+    });
+
+    req.on('error', e => {
+      reject(e.message);
+    });
+
+    req.write(postData);
+    req.end();
+  })
+}
+
 module.exports = {
   get(url, config = {}) {
     const { responseType, timeout = 3000 } = config;
@@ -51,41 +90,23 @@ module.exports = {
     })
   },
   post(url, data) {
-    const request = /https:/.test(url) ? https : http;
-    
-    return new Promise((resolve, reject) => {
-      const options = {
-        method: 'post',
-        timeout: 3000
-      };
-
-      const postData = JSON.stringify(data);
-
-      options.headers = {
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(postData)
-      }
-
-      const req = request.request(url, options, res => {
-        let body = '';
-
-        res.on('data', chunk => {
-          res.setEncoding('utf8');
-          // equal to: body += data.toString()
-          body += chunk;
-        });
-
-        res.on('end', () => {
-          resolve(body);
-        });
-      });
-
-      req.on('error', e => {
-        reject(e.message);
-      });
-
-      req.write(postData);
-      req.end();
+    return getPromise({
+      url,
+      data,
+      method: 'POST'
+    })
+  },
+  put(url, data) {
+    return getPromise({
+      url,
+      data,
+      method: 'PUT'
+    })
+  },
+  del(url) {
+    return getPromise({
+      url,
+      method: 'DELETE'
     })
   }
 }
