@@ -10,7 +10,7 @@ $ npm i @zhangfuxing/http
 ## Useage  
 
 ```js
-const rmdir = require('@zhangfuxing/http');
+const http = require('@zhangfuxing/http');
 const assert = require('assert');
 
 (async () => {
