@@ -2,24 +2,34 @@
 import http = require('http');
 import https = require('https');
 
-export interface Options {
+interface Options {
   timeout?: number;
   agent?: http.Agent | https.Agent | boolean;
   auth?: string;
-  createConnection?: function;
+  createConnection?: Function;
   family?: number;
   headers?: object;
   localAddress?: number;
-  lookup?: function;
+  lookup?: Function;
+  onlyData?: boolean;
+  withRequest?: boolean;
+  withResponse?: boolean;
 }
 
-export interface request {
+interface request {
   /**
    * head 
    *   - `url` the server URL that will be used for the request
    *   - `options` optional parameters
    */
   head(url: string, options?: Options): Promise<any>;
+
+  /**
+   * options 
+   *   - `url` the server URL that will be used for the request
+   *   - `options` optional parameters
+   */
+  options(url: string, options?: Options): Promise<any>;
 
   /**
    * get 
@@ -51,7 +61,6 @@ export interface request {
    *   - `options` optional parameters
    */
   patch(url: string, data: object, options?: Options): Promise<any>;
-
 
   /**
    * delete 
