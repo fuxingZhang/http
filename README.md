@@ -22,40 +22,50 @@ const assert = require('assert');
 })().catch(console.error);
 ```  
 
-## Options
+## Type definitions
 ```ts
-export interface configOption {
-  responseType?: string;
+import http = require('http');
+
+export interface Options {
   timeout?: number;
-  [propName: string]: any;
+  agent?: http.Agent | boolean;
+  auth ?: string;
+  createConnection?: function;
+  family?: number;
+  headers?: object;
+  localAddress?: number;
+  lookup?: function;
 }
 
 /**
  * get 
  *   - `url` the server URL that will be used for the request
- *   - `data` the data to be sent as the request body
+ *   - `options` optional parameters
  */
-export function get(url: string, config: configOption): Promise<any>;
+export function get(url: string, options: Options): Promise<any>;
 
 /**
  * post 
  *   - `url` the server URL that will be used for the request
  *   - `data` the data to be sent as the request body
+ *   - `options` optional parameters
  */
-export function post(url: string, data: object): Promise<any>;
+export function post(url: string, data: object, options: Options): Promise<any>;
 
 /**
  * put 
  *   - `url` the server URL that will be used for the request
  *   - `data` the data to be sent as the request body
+ *   - `options` optional parameters
  */
-export function put(url: string, data: object): Promise<any>;
+export function put(url: string, data: object, options: Options): Promise<any>;
 
 /**
  * delete 
  *   - `url` the server URL that will be used for the request
+ *   - `options` optional parameters
  */
-export function del(url: string): Promise<any>;
+export function del(url: string, options: Options): Promise<any>;
 ```
 
 ## test
