@@ -14,9 +14,11 @@ const http = require('@zhangfuxing/http');
 const assert = require('assert');
 
 (async () => {
+  // http
   const httpRes = await http.get('http://baidu.com');
   assert(httpRes.includes('<html>'));
 
+  // https
   const httpsRes = await http.get('https://cnodejs.org/api/v1/topics?limit=1&mdrender=false');
   assert(httpsRes.success === true);
 })().catch(console.error);

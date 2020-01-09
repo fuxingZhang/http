@@ -1,44 +1,14 @@
 'use strict';
 
 const request = require('./lib/request');
+const unsafeMethods = require('./lib/unsafeMethods');
+const safeMethods = require('./lib/safeMethods');
+const methods = [...safeMethods, ...unsafeMethods];
 
-/**
- * get 
- * @param {String} url the server URL that will be used for the request
- * @param {Object} options optional parameters
- */
-exports.get = function (url, options = {}) {
-  return request(url, null, options);
-};
-
-/**
- * post 
- * @param {String} url the server URL that will be used for the request
- * @param {Object | String} data the data to be sent as the request body
- * @param {Object} options optional parameters
- */
-exports.post = function (url, data, options = {}) {
-  options.method = 'POST';
-  return request(url, data, options);
-};
-
-/**
- * put 
- * @param {String} url the server URL that will be used for the request
- * @param {Object | String} data the data to be sent as the request body
- * @param {Object} options optional parameters
- */
-exports.put = function (url, data, options = {}) {
-  options.method = 'PUT';
-  return request(url, data, options);
-};
-
-/**
- * delete 
- * @param {String} url the server URL that will be used for the request
- * @param {Object} options optional parameters
- */
-exports.delete = function (url, options = {}) {
-  options.method = 'DELETE';
-  return request(url, null, options);
-};
+for (const method of methods) {
+  exports[method.toLowerCase()] = function (url, data, options = {}) {
+    options.method = method;
+    if(unsafeMethods.includes(method)) options.data = data;
+    return request(url, options);
+  };
+}

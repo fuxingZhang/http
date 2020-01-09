@@ -1,10 +1,11 @@
 // Type definitions
 import http = require('http');
+import https = require('https');
 
 export interface Options {
   timeout?: number;
-  agent?: http.Agent | boolean;
-  auth ?: string;
+  agent?: http.Agent | https.Agent | boolean;
+  auth?: string;
   createConnection?: function;
   family?: number;
   headers?: object;
@@ -12,32 +13,54 @@ export interface Options {
   lookup?: function;
 }
 
-/**
- * get 
- *   - `url` the server URL that will be used for the request
- *   - `options` optional parameters
- */
-export function get(url: string, options: Options): Promise<any>;
+export interface request {
+  /**
+   * head 
+   *   - `url` the server URL that will be used for the request
+   *   - `options` optional parameters
+   */
+  head(url: string, options?: Options): Promise<any>;
 
-/**
- * post 
- *   - `url` the server URL that will be used for the request
- *   - `data` the data to be sent as the request body
- *   - `options` optional parameters
- */
-export function post(url: string, data: object, options: Options): Promise<any>;
+  /**
+   * get 
+   *   - `url` the server URL that will be used for the request
+   *   - `options` optional parameters
+   */
+  get(url: string, options?: Options): Promise<any>;
 
-/**
- * put 
- *   - `url` the server URL that will be used for the request
- *   - `data` the data to be sent as the request body
- *   - `options` optional parameters
- */
-export function put(url: string, data: object, options: Options): Promise<any>;
+  /**
+   * post 
+   *   - `url` the server URL that will be used for the request
+   *   - `data` the data to be sent as the request body
+   *   - `options` optional parameters
+   */
+  post(url: string, data: object, options?: Options): Promise<any>;
 
-/**
- * delete 
- *   - `url` the server URL that will be used for the request
- *   - `options` optional parameters
- */
-export function del(url: string, options: Options): Promise<any>;
+  /**
+   * put 
+   *   - `url` the server URL that will be used for the request
+   *   - `data` the data to be sent as the request body
+   *   - `options` optional parameters
+   */
+  put(url: string, data: object, options?: Options): Promise<any>;
+
+  /**
+   * patch 
+   *   - `url` the server URL that will be used for the request
+   *   - `data` the data to be sent as the request body
+   *   - `options` optional parameters
+   */
+  patch(url: string, data: object, options?: Options): Promise<any>;
+
+
+  /**
+   * delete 
+   *   - `url` the server URL that will be used for the request
+   *   - `options` optional parameters
+   */
+  delete(url: string, options?: Options): Promise<any>;
+}
+
+declare const request: request;
+
+export = request;
