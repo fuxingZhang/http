@@ -1,6 +1,6 @@
 {
   "name": "@zhangfuxing/http",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Promise based HTTP client for node.js",
   "main": "lib",
   "directories": {
@@ -15,10 +15,11 @@
     "url": "git+https://github.com/fuxingZhang/http.git"
   },
   "keywords": [
-    "get",
-    "post",
-    "put",
-    "delete"
+    "http",
+    "promise",
+    "fetch",
+    "request",
+    "node"
   ],
   "author": "Zhang Fu Xing <502545703@qq.com>",
   "license": "MIT",
