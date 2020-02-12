@@ -30,7 +30,7 @@ interface Options {
   // Specifies whether or not to automatically add the Host header. Defaults to true.
   setHost: boolean;
   // only include body data
-  onlyData?: boolean;
+  onlyData?: boolean; // Default: method === 'HEAD' ? false : true;
   // if onlyData is false, withRequest is true can add request to res data
   withRequest?: boolean;
   // if onlyData is false, withResponse is true can add response to res data
