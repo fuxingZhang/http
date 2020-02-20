@@ -5,7 +5,13 @@ const assert = require('assert');
 const express = require('express');
 const bodyParser = require('body-parser');
 const port = 3000;
-const url = `http://localhost:${port}/`;
+const url = `http://localhost:${port}`;
+const fs = require('fs');
+const stream = require('stream');
+const util = require('util');
+const pipeline = util.promisify(stream.pipeline);
+const FormData = require('form-data');
+const Busboy = require('busboy');
 
 describe('http', function () {
   let server;
@@ -13,6 +19,9 @@ describe('http', function () {
   const optionsRes = 'GET,HEAD,POST,PUT,PATCH,DELETE';
   const name = 'zfx';
   const data = { name };
+  const filename = 'zfx.txt';
+  const testfile = 'test/test.txt';
+  const abc = 'abc';
 
   before(function () {
     const app = express();
@@ -24,6 +33,94 @@ describe('http', function () {
       .get('/', (req, res) => res.send(message))
       .post('/', function (req, res) {
         res.send(req.body);
+      })
+      .post('/buffer-or-stream', async function (req, res) {
+        const { type } = req.query;
+        const chunks = [];
+
+        req.on('data', data => {
+          chunks.push(data);
+        });
+
+        req.on('end', async () => {
+          const str = Buffer.concat(chunks).toString();
+          if (type === 'buffer') {
+            assert(str === abc);
+          } else if (type === 'stream') {
+            const index = await fs.promises.readFile(filename, {
+              encoding: 'utf8'
+            });
+            assert(str === index);
+          } else {
+            assert(false);
+          }
+        });
+
+        await pipeline(req, fs.createWriteStream(filename));
+
+        res.send({
+          success: true
+        });
+      })
+      .post('/formdata', async function (req, res) {
+        try {
+          const body = await new Promise((resolve, reject) => {
+            const busboy = new Busboy({
+              headers: req.headers
+            });
+
+            const body = {};
+
+            busboy.on('file', async (fieldname, file, filename, encoding, mimetype) => {
+              const chunks = [];
+
+              file.on('data', data => {
+                chunks.push(data);
+              });
+
+              file.on('end', async () => {
+                const str = Buffer.concat(chunks).toString();
+                if (fieldname === 'buffer') {
+                  assert(str === abc);
+                  body[fieldname] = str;
+                } else if (fieldname === 'file') {
+                  const index = await fs.promises.readFile(filename, {
+                    encoding: 'utf8'
+                  });
+                  assert(str === index);
+                } else {
+                  assert(false);
+                }
+              });
+
+              if (fieldname === 'file') await pipeline(file, fs.createWriteStream(filename));
+            });
+
+            busboy.on('field', function (fieldname, val, fieldnameTruncated, valTruncated, encoding, mimetype) {
+              body[fieldname] = val;
+              assert(fieldname === 'name');
+              assert(val === name);
+            });
+
+            busboy.on('finish', () => {
+              resolve(body);
+            });
+
+            busboy.on('error', e => reject(e));
+
+            req.pipe(busboy);
+          });
+
+          res.send({
+            success: true,
+            ...body
+          });
+        } catch (error) {
+          res.send({
+            success: false,
+            error: error.message
+          });
+        }
       })
       .put('/', function (req, res) {
         res.send(req.body);
@@ -40,7 +137,8 @@ describe('http', function () {
     server = app.listen(port);
   });
 
-  after(function () {
+  after(async function () {
+    await fs.promises.unlink(filename);
     server.close();
   });
 
@@ -135,7 +233,6 @@ describe('http', function () {
   });
 
   it('post method should ok', async () => {
-
     const res = await http.post(url, data);
 
     assert(typeof res === 'object');
@@ -158,7 +255,6 @@ describe('http', function () {
   });
 
   it('patch method should ok', async () => {
-
     const res = await http.patch(url, data);
 
     assert(typeof res === 'object');
@@ -181,7 +277,6 @@ describe('http', function () {
   });
 
   it('put method should ok', async () => {
-
     const res = await http.put(url, data);
 
     assert(typeof res === 'object');
@@ -204,7 +299,6 @@ describe('http', function () {
   });
 
   it('delete method should ok', async () => {
-
     const res = await http.delete(url, data);
 
     assert(typeof res === 'object');
@@ -224,5 +318,61 @@ describe('http', function () {
     assert(res.response === undefined);
     assert(typeof res.data === 'object');
     assert(res.data.success === true);
+  });
+
+  it('post buffer should ok', async () => {
+    const res = await http.post(`${url}/buffer-or-stream?type=buffer`, Buffer.from(abc));
+    const data = await fs.promises.readFile(filename, {
+      encoding: 'utf8'
+    });
+
+    assert(typeof res === 'object');
+    assert(res.success === true);
+    assert(data === abc);
+  });
+
+  it('post stream should ok', async () => {
+    const readStream = fs.createReadStream(testfile);
+    const res = await http.post(`${url}/buffer-or-stream?type=stream`, readStream);
+
+    const index = await fs.promises.readFile(testfile, {
+      encoding: 'utf8'
+    });
+    const data = await fs.promises.readFile(filename, {
+      encoding: 'utf8'
+    });
+
+    assert(typeof res === 'object');
+    assert(res.success === true);
+    assert(data === index);
+  });
+
+  it('post formdata should ok', async () => {
+    const readStream = fs.createReadStream(testfile);
+    const form = new FormData();
+
+    form.append('name', name);
+    form.append('buffer', Buffer.from(abc));
+    form.append('file', readStream, filename);
+
+    const formHeaders = form.getHeaders();
+    const res = await http.post(`${url}/formdata`, form, {
+      headers: {
+        ...formHeaders,
+      },
+    });
+
+    const index = await fs.promises.readFile(testfile, {
+      encoding: 'utf8'
+    });
+    const data = await fs.promises.readFile(filename, {
+      encoding: 'utf8'
+    });
+
+    assert(typeof res === 'object');
+    assert(res.success === true);
+    assert(res.name === name);
+    assert(res.buffer === abc);
+    assert(data === index);
   });
 });
