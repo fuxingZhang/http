@@ -21,8 +21,43 @@ const assert = require('assert');
   // https
   const httpsRes = await http.get('https://cnodejs.org/api/v1/topics?limit=1&mdrender=false');
   assert(httpsRes.success === true);
-})().catch(console.error);
+
+  // Buffer
+  const httpsRes = await http.post('http://localhost/upload', Buffer.from('abc'));
+  assert(httpsRes.success === true);
+
+  // Stream
+  const fs = require('fs');
+  const readStream = fs.createReadStream('./index.js');
+  const httpsRes = await http.post('http://localhost/upload', readStream);
+  assert(httpsRes.success === true);
+
+  // FormData
+  const FormData = require('form-data');
+  const form = new FormData();
+  const fs = require('fs');
+  const readStream = fs.createReadStream('./index.js');
+  form.append('my_field', 'my value');
+  form.append('my_buffer', Buffer.from('abc'));
+  form.append('my_file', readStream);
+  // Set filename by providing a string for options
+  form.append('my_file', readStream, '1.js' );
+  // provide an object.
+  form.append('my_file', readStream, { 
+    filename: 'bar.jpg', 
+    contentType: 'image/jpeg', 
+    knownLength: 19806
+  });
+  const formHeaders = form.getHeaders();
+  const httpsRes = await http.post('http://localhost/upload', form, {
+    headers: {
+      ...formHeaders,
+    },
+  });
+  assert(httpsRes.success === true);
 ```  
+
+More examples in the `test` folder.
 
 ## Type definitions
 ```ts
