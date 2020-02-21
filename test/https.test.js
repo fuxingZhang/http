@@ -23,7 +23,10 @@ describe('https', function () {
   const name = 'zfx';
   const data = { name };
   const filename = 'zfx.txt';
-  const testfile = 'test/test.txt';
+  const testfile = './test/test.txt';
+  const testFileText = fs.readFileSync(testfile, {
+    encoding: 'utf8'
+  });
   const abc = 'abc';
 
   before(function () {
@@ -34,6 +37,14 @@ describe('https', function () {
 
     app
       .get('/', (req, res) => res.send(message))
+      .get('/stream', async (req, res) => {
+        const stream = fs.createReadStream(testfile);
+
+        await pipeline(stream, res).catch(err => {
+          console.log('stream error:', err);
+          stream.destroy();
+        });
+      })
       .post('/', function (req, res) {
         res.send(req.body);
       })
@@ -151,6 +162,22 @@ describe('https', function () {
   it('get method should ok', async () => {
     const res = await http.get(url);
     assert(res === message);
+  });
+
+  it('get stream should ok', async () => {
+    try {
+      const res = await http.get(`${url}/stream`, {
+        responseType: "stream"
+      });
+      await pipeline(res, fs.createWriteStream(filename));
+      const data = await fs.promises.readFile(filename, {
+        encoding: 'utf8'
+      })
+
+      assert(data === testFileText);
+    } catch (error) {
+      console.log(error)
+    }
   });
 
   it('get method should ok(onlyData: false)', async () => {
@@ -340,17 +367,13 @@ describe('https', function () {
   it('post stream should ok', async () => {
     const readStream = fs.createReadStream(testfile);
     const res = await http.post(`${url}/buffer-or-stream?type=stream`, readStream);
-
-    const index = await fs.promises.readFile(testfile, {
-      encoding: 'utf8'
-    });
     const data = await fs.promises.readFile(filename, {
       encoding: 'utf8'
     });
 
     assert(typeof res === 'object');
     assert(res.success === true);
-    assert(data === index);
+    assert(data === testFileText);
   });
 
   it('post formdata should ok', async () => {
@@ -367,10 +390,6 @@ describe('https', function () {
         ...formHeaders,
       },
     });
-
-    const index = await fs.promises.readFile(testfile, {
-      encoding: 'utf8'
-    });
     const data = await fs.promises.readFile(filename, {
       encoding: 'utf8'
     });
@@ -379,6 +398,6 @@ describe('https', function () {
     assert(res.success === true);
     assert(res.name === name);
     assert(res.buffer === abc);
-    assert(data === index);
+    assert(data === testFileText);
   });
 });
