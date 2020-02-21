@@ -6,11 +6,9 @@ interface Options {
   // `responseType` indicates the type of data that the server will respond with
   // options are: 'buffer', 'json', 'text', 'stream'
   responseType: 'json', // default
-
   // `responseEncoding` indicates encoding to use for decoding responses
   // Note: Ignored for `responseType` of 'stream' or client-side requests
   responseEncoding: 'utf8', // default
-
   // `timeout` specifies the number of milliseconds before the request times out.
   // If the request takes longer than `timeout`, the request will be aborted.
   timeout?: number; // Default: Node.js default value
