@@ -22,6 +22,21 @@ const assert = require('assert');
   const httpsRes = await http.get('https://cnodejs.org/api/v1/topics?limit=1&mdrender=false');
   assert(httpsRes.success === true);
 
+  // download file: use pipe
+  const fs = require('fs');
+  const res = await http.get('http://localhost:3000', {
+    responseType: "stream"
+  })
+  res.pipe(require('fs').createWriteStream('zfx.txt'))
+  // or use pipeline
+  const stream = require('stream');
+  const util = require('util');
+  const pipeline = util.promisify(stream.pipeline);
+  const res = await http.get(`${url}/stream`, {
+    responseType: "stream"
+  });
+  await pipeline(res, fs.createWriteStream('zfx.txt'));
+
   // Buffer
   const httpsRes = await http.post('http://localhost/upload', Buffer.from('abc'));
   assert(httpsRes.success === true);
@@ -65,6 +80,14 @@ import http = require('http');
 import https = require('https');
 
 interface Options {
+  // `responseType` indicates the type of data that the server will respond with
+  // options are: 'buffer', 'json', 'text', 'stream'
+  responseType: 'json', // default
+
+  // `responseEncoding` indicates encoding to use for decoding responses
+  // Note: Ignored for `responseType` of 'stream' or client-side requests
+  responseEncoding: 'utf8', // default
+
   // `timeout` specifies the number of milliseconds before the request times out.
   // If the request takes longer than `timeout`, the request will be aborted.
   timeout?: number; // Default: Node.js default value
