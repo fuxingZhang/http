@@ -37,17 +37,38 @@ const assert = require('assert');
   });
   await pipeline(res, fs.createWriteStream('zfx.txt'));
 
-  // Buffer
-  const httpsRes = await http.post('http://localhost/upload', Buffer.from('abc'));
-  assert(httpsRes.success === true);
+  // post Buffer
+  const res = await http.post('http://localhost/upload', Buffer.from('abc'));
+  assert(res.success === true);
 
-  // Stream
+  // post Stream
   const fs = require('fs');
   const readStream = fs.createReadStream('./index.js');
-  const httpsRes = await http.post('http://localhost/upload', readStream);
-  assert(httpsRes.success === true);
+  const res = await http.post('http://localhost/upload', readStream);
+  assert(res.success === true);
 
-  // FormData
+  // post json
+  const data = {
+    username: 'zfx',
+    password: 'password'
+  };
+  const res = await http.post('http://localhost/upload', data);
+  assert(res.success === true);
+  
+  // post application/x-www-form-urlencoded
+  const data = {
+    username: 'zfx',
+    password: 'password'
+  };
+  const options = {
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  };
+  const res = await http.post('http://localhost/upload', data, options);
+  assert(res.success === true);
+
+  // post FormData
   const FormData = require('form-data');
   const form = new FormData();
   const fs = require('fs');
