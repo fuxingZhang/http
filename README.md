@@ -85,12 +85,12 @@ const assert = require('assert');
     knownLength: 19806
   });
   const formHeaders = form.getHeaders();
-  const httpsRes = await http.post('http://localhost/upload', form, {
+  const res = await http.post('http://localhost/upload', form, {
     headers: {
       ...formHeaders,
     },
   });
-  assert(httpsRes.success === true);
+  assert(res.success === true);
 ```  
 
 More examples in the `test` folder.
