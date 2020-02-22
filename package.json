@@ -16,12 +16,18 @@
   },
   "keywords": [
     "http",
+    "https",
     "promise",
     "fetch",
     "request",
-    "node"
+    "node",
+    "nodejs",
+    "Node.js"
   ],
-  "author": "Zhang Fu Xing <502545703@qq.com>",
+  "author": {
+    "name": "Zhang Fu Xing",
+    "email": "502545703@qq.com"
+  },
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/fuxingZhang/http/issues"
