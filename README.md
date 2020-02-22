@@ -91,6 +91,18 @@ const assert = require('assert');
     },
   });
   assert(res.success === true);
+
+  // head
+  const res = await http.head(url);
+  assert(res.statusCode === 200);
+  assert(res.statusMessage === 'OK');
+  assert(res.headers && typeof res.headers === 'object');
+  assert(res.statusCode === 200);
+  assert(res.data === '');
+
+  // options
+  const res = await http.options(url);
+  assert(res === 'GET,HEAD,POST,PUT,PATCH,DELETE'); 
 ```  
 
 More examples in the `test` folder.
