@@ -103,6 +103,7 @@ const assert = require('assert');
   // options
   const res = await http.options(url);
   assert(res === 'GET,HEAD,POST,PUT,PATCH,DELETE'); 
+})().catch(console.error);
 ```  
 
 More examples in the `test` folder.
